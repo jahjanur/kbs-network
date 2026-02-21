@@ -1,13 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { LogIn, Mail, Lock, ArrowRight } from "lucide-react";
+import { LogIn, Mail, Lock, ArrowRight, AlertCircle } from "lucide-react";
+import {
+  validateCredentials,
+  isLoggedIn,
+  isOnboardingComplete,
+  getStoredRole,
+} from "@/lib/user-store";
 
 const schema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -18,14 +25,39 @@ type LoginData = z.infer<typeof schema>;
 
 export default function LoginPage() {
   const router = useRouter();
+  const [authError, setAuthError] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<LoginData>({ resolver: zodResolver(schema) });
 
+  useEffect(() => {
+    if (isLoggedIn() && isOnboardingComplete()) {
+      router.replace("/dashboard");
+    }
+  }, [router]);
+
   const onSubmit = (data: LoginData) => {
-    console.log("login", data);
+    setAuthError(null);
+
+    if (!validateCredentials(data.email, data.password)) {
+      setAuthError("Invalid email or password");
+      return;
+    }
+
+    // Credentials valid — route based on onboarding state
+    const role = getStoredRole();
+    if (!role) {
+      router.push("/register/role");
+      return;
+    }
+
+    if (!isOnboardingComplete()) {
+      router.push(`/onboarding/${role}`);
+      return;
+    }
+
     router.push("/dashboard");
   };
 
@@ -43,6 +75,22 @@ export default function LoginPage() {
         <h1 className="text-2xl font-bold text-[var(--foreground)]">Welcome back</h1>
         <p className="mt-1 text-sm text-[var(--foreground-muted)]">Sign in to your account</p>
       </div>
+
+      {/* Auth error */}
+      <AnimatePresence>
+        {authError && (
+          <motion.div
+            className="mb-4 flex items-center gap-2 rounded-xl border border-[var(--accent-rose)]/20 bg-[var(--accent-rose)]/10 px-4 py-3 text-sm text-[var(--accent-rose)]"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+          >
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            {authError}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>

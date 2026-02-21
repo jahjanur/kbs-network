@@ -21,17 +21,17 @@ export function AmbientBg({ className, orbs = true, grid = true, gradient = true
             className="absolute inset-0 opacity-60 dark:opacity-40"
             style={{
               background: `
-                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(245, 166, 35, 0.12), transparent 60%),
-                radial-gradient(ellipse 60% 40% at 85% 50%, rgba(59, 130, 246, 0.06), transparent 50%),
-                radial-gradient(ellipse 50% 30% at 15% 80%, rgba(139, 92, 246, 0.05), transparent 50%)
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(245, 166, 35, 0.10), transparent 60%),
+                radial-gradient(ellipse 60% 40% at 85% 50%, rgba(11, 32, 63, 0.15), transparent 50%),
+                radial-gradient(ellipse 50% 30% at 15% 80%, rgba(11, 30, 60, 0.12), transparent 50%)
               `,
             }}
           />
           {/* Top accent line */}
           <div
-            className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-2/3 opacity-40"
+            className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-2/3 opacity-30"
             style={{
-              background: "linear-gradient(90deg, transparent, rgba(245, 166, 35, 0.4), transparent)",
+              background: "linear-gradient(90deg, transparent, rgba(245, 166, 35, 0.35), transparent)",
             }}
           />
         </>
@@ -41,35 +41,35 @@ export function AmbientBg({ className, orbs = true, grid = true, gradient = true
         <>
           {/* Gold orb — left */}
           <div
-            className="absolute -left-[15%] top-[5%] h-[500px] w-[500px] rounded-full opacity-15 dark:opacity-10"
+            className="absolute -left-[15%] top-[5%] h-[500px] w-[500px] rounded-full opacity-12 dark:opacity-8"
             style={{
-              background: "radial-gradient(circle, rgba(245, 166, 35, 0.3) 0%, transparent 65%)",
+              background: "radial-gradient(circle, rgba(245, 166, 35, 0.25) 0%, transparent 65%)",
               animation: "float 22s ease-in-out infinite",
             }}
           />
-          {/* Blue orb — right */}
+          {/* Navy orb — right */}
           <div
-            className="absolute -right-[10%] top-[35%] h-[400px] w-[400px] rounded-full opacity-10 dark:opacity-[0.06]"
+            className="absolute -right-[10%] top-[35%] h-[400px] w-[400px] rounded-full opacity-10 dark:opacity-[0.08]"
             style={{
-              background: "radial-gradient(circle, rgba(59, 130, 246, 0.25) 0%, transparent 65%)",
+              background: "radial-gradient(circle, rgba(11, 32, 63, 0.4) 0%, transparent 65%)",
               animation: "float-slow 28s ease-in-out infinite",
               animationDelay: "-5s",
             }}
           />
-          {/* Subtle violet orb — bottom */}
+          {/* Subtle navy orb — bottom */}
           <div
-            className="absolute bottom-[10%] left-[25%] h-[350px] w-[350px] rounded-full opacity-8 dark:opacity-[0.05]"
+            className="absolute bottom-[10%] left-[25%] h-[350px] w-[350px] rounded-full opacity-8 dark:opacity-[0.06]"
             style={{
-              background: "radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, transparent 65%)",
+              background: "radial-gradient(circle, rgba(11, 30, 60, 0.3) 0%, transparent 65%)",
               animation: "float 26s ease-in-out infinite",
               animationDelay: "-10s",
             }}
           />
           {/* Small gold accent — center */}
           <div
-            className="absolute top-[60%] right-[30%] h-[200px] w-[200px] rounded-full opacity-10 dark:opacity-[0.06]"
+            className="absolute top-[60%] right-[30%] h-[200px] w-[200px] rounded-full opacity-10 dark:opacity-[0.05]"
             style={{
-              background: "radial-gradient(circle, rgba(245, 166, 35, 0.25) 0%, transparent 60%)",
+              background: "radial-gradient(circle, rgba(245, 166, 35, 0.2) 0%, transparent 60%)",
               animation: "float-slow 20s ease-in-out infinite",
               animationDelay: "-8s",
             }}

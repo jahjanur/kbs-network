@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlayerCard, type PlayerCardData } from "@/components/player-card";
-import { Search, SlidersHorizontal, X, Clock, MapPin } from "lucide-react";
+import { Search, SlidersHorizontal, X, Clock, MapPin, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { isLoggedIn } from "@/lib/user-store";
 
 const tabs = ["Players", "Coaches", "Clubs", "Jobs"] as const;
 
@@ -21,9 +23,34 @@ export function DiscoverClient() {
   const [active, setActive] = useState<(typeof tabs)[number]>("Players");
   const [search, setSearch] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [authed, setAuthed] = useState(true);
+
+  useEffect(() => {
+    setAuthed(isLoggedIn());
+  }, []);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:py-12">
+      {/* Guest signup banner */}
+      {!authed && (
+        <motion.div
+          className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-2xl border border-[var(--gold)]/20 bg-[var(--gold)]/5 p-4 sm:px-6"
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <div className="flex items-center gap-3">
+            <Lock className="h-4 w-4 text-[var(--gold)] shrink-0" />
+            <p className="text-sm text-[var(--foreground-muted)]">
+              Sign up to message players, save favorites, and unlock full profiles.
+            </p>
+          </div>
+          <Button variant="primary" size="sm" className="rounded-full px-5 shrink-0" asChild>
+            <Link href="/register">Sign up free</Link>
+          </Button>
+        </motion.div>
+      )}
+
       {/* Header */}
       <motion.div
         className="mb-8"

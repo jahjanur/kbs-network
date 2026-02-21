@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { KBLogo } from "@/components/kb-logo";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { getStoredRole, isOnboardingComplete } from "@/lib/user-store";
+import { getStoredRole, isOnboardingComplete, clearStoredUser } from "@/lib/user-store";
 import type { Role } from "@/lib/user-store";
 import {
   LayoutDashboard,
@@ -18,11 +18,12 @@ import {
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ROLE_ALLOWED_HREFS } from "@/lib/nav-config";
 
 const nav: { href: string; label: string; icon: typeof Compass }[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/discover", label: "Discover", icon: Compass },
-  { href: "/jobs", label: "Jobs", icon: Briefcase },
+  { href: "/dashboard/discover", label: "Discover", icon: Compass },
+  { href: "/dashboard/jobs", label: "Jobs", icon: Briefcase },
   { href: "/dashboard/messages", label: "Messages", icon: MessageCircle },
   { href: "/dashboard/favorites", label: "Favorites", icon: Heart },
   { href: "/dashboard/profile", label: "Profile", icon: User },
@@ -49,11 +50,10 @@ export default function DashboardLayout({
     setReady(true);
   }, [router]);
 
+  const filteredNav = role ? nav.filter((item) => ROLE_ALLOWED_HREFS[role].has(item.href)) : nav;
+
   function handleLogout() {
-    if (typeof window === "undefined") return;
-    localStorage.removeItem("kbs_role");
-    localStorage.removeItem("kbs_onboarding_done");
-    localStorage.removeItem("kbs_profile");
+    clearStoredUser();
     router.replace("/");
   }
 
@@ -84,7 +84,7 @@ export default function DashboardLayout({
             <KBLogo size="sm" showText={true} />
           </Link>
           <nav className="hidden items-center gap-1 md:flex">
-            {nav.map((item) => (
+            {filteredNav.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -117,7 +117,7 @@ export default function DashboardLayout({
         </div>
         {/* Mobile nav */}
         <div className="flex gap-1 overflow-x-auto px-4 pb-2 md:hidden">
-          {nav.map((item) => (
+          {filteredNav.map((item) => (
             <Link
               key={item.href}
               href={item.href}

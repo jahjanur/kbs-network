@@ -21,7 +21,7 @@ export default function DashboardPlayerPage() {
       100,
       [
         profile.name,
-        profile.age,
+        profile.dateOfBirth,
         profile.positionPrimary,
         profile.city || profile.country,
         profile.currentClub || profile.availability,

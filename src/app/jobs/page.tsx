@@ -1,13 +1,24 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Header } from "@/components/header";
 import { AmbientBg } from "@/components/ambient-bg";
 import { Button } from "@/components/ui/button";
 import { Briefcase, ArrowRight } from "lucide-react";
+import { isLoggedIn } from "@/lib/user-store";
 
 export default function JobsPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoggedIn()) {
+      router.replace("/dashboard/jobs");
+    }
+  }, [router]);
+
   return (
     <>
       <Header />
