@@ -83,16 +83,18 @@ export function RolesSection() {
                         return (
                             <motion.div key={role.title} variants={item} className="h-full">
                                 <Link href={role.href} className="block h-full">
-                                    <div
-                                        className={`glass-card group p-6 flex flex-col h-full bg-gradient-to-br ${role.gradient} ${role.borderColor}`}
-                                    >
-                                        <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--surface)] ${role.iconColor}`}>
-                                            <Icon className="h-6 w-6 transition-transform duration-300 group-hover:scale-110" />
-                                        </div>
-                                        <h3 className="text-lg font-semibold text-[var(--foreground)]">{role.title}</h3>
-                                        <p className="mt-2 text-sm text-[var(--foreground-muted)] flex-1">{role.desc}</p>
-                                        <div className="mt-4 flex items-center text-sm font-medium text-[var(--gold)] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                            Get started <ChevronRight className="h-4 w-4 ml-1" />
+                                    <div className="gradient-border-card h-full">
+                                        <div
+                                            className={`group p-7 flex flex-col h-full bg-[var(--card-bg)] backdrop-blur-xl border border-[var(--surface-border)] rounded-[1.2rem] transition-all duration-[400ms] hover:-translate-y-1.5 hover:shadow-xl bg-gradient-to-br ${role.gradient} ${role.borderColor}`}
+                                        >
+                                            <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--surface)] ${role.iconColor}`}>
+                                                <Icon className="h-6 w-6 transition-transform duration-300 group-hover:scale-110" />
+                                            </div>
+                                            <h3 className="text-lg font-semibold text-[var(--foreground)]">{role.title}</h3>
+                                            <p className="mt-2 text-sm text-[var(--foreground-muted)] flex-1">{role.desc}</p>
+                                            <div className="mt-4 flex items-center text-sm font-medium text-[var(--gold)] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                Get started <ChevronRight className="h-4 w-4 ml-1" />
+                                            </div>
                                         </div>
                                     </div>
                                 </Link>

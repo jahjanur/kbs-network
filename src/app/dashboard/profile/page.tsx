@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { getStoredRole, getStoredProfile, getProfilePicture, setProfilePicture, getBannerImage, setBannerImage } from "@/lib/user-store";
+import { getStoredRole, getStoredProfile, getProfilePicture, setProfilePicture, getBannerImage, setBannerImage, getUserStatus, setUserStatus } from "@/lib/user-store";
 import type { Profile, PlayerProfile, CoachProfile, ClubProfile, ScoutProfile, SponsorProfile } from "@/lib/user-store";
+import { USER_STATUS_OPTIONS, getStatusConfig } from "@/lib/permissions";
+import type { UserStatus } from "@/lib/permissions";
 import { POSITIONS, ZONE_COLORS } from "@/lib/football-positions";
 import { Button } from "@/components/ui/button";
 import {
@@ -114,6 +116,7 @@ export default function DashboardProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [avatar, setAvatar] = useState<string | null>(null);
   const [banner, setBanner] = useState<string | null>(null);
+  const [status, setStatus] = useState<UserStatus | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const bannerRef = useRef<HTMLInputElement>(null);
 
@@ -125,7 +128,15 @@ export default function DashboardProfilePage() {
     setProfile(p);
     setAvatar(getProfilePicture());
     setBanner(getBannerImage());
+    if (r === "player" || r === "coach") {
+      setStatus(getUserStatus());
+    }
   }, [router]);
+
+  function handleStatusChange(newStatus: UserStatus) {
+    setUserStatus(newStatus);
+    setStatus(newStatus);
+  }
 
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -243,6 +254,35 @@ export default function DashboardProfilePage() {
             <div className="min-w-0 flex-1 pb-1">
               <h2 className="text-xl sm:text-2xl font-bold text-[var(--foreground)] truncate">{name}</h2>
               <p className="text-sm text-[var(--foreground-muted)] capitalize">{role}</p>
+              {/* Status selector for player/coach */}
+              {(role === "player" || role === "coach") && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {USER_STATUS_OPTIONS.map((opt) => {
+                    const isActive = status === opt.value;
+                    const colorMap: Record<string, string> = {
+                      emerald: isActive ? "bg-emerald-500/20 text-emerald-500 border-emerald-500/40" : "hover:border-emerald-500/30",
+                      amber: isActive ? "bg-amber-500/20 text-amber-500 border-amber-500/40" : "hover:border-amber-500/30",
+                      blue: isActive ? "bg-blue-500/20 text-blue-500 border-blue-500/40" : "hover:border-blue-500/30",
+                      violet: isActive ? "bg-violet-500/20 text-violet-500 border-violet-500/40" : "hover:border-violet-500/30",
+                      slate: isActive ? "bg-slate-500/20 text-slate-500 border-slate-500/40" : "hover:border-slate-500/30",
+                    };
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => handleStatusChange(opt.value)}
+                        className={`rounded-full border px-2.5 py-1 text-[10px] font-medium transition-all ${
+                          isActive
+                            ? colorMap[opt.color]
+                            : `bg-[var(--surface)] text-[var(--foreground-muted)] border-[var(--surface-border)] ${colorMap[opt.color]}`
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -20,6 +20,7 @@ export function LandingContent() {
       <PartnersMarquee />
       <LiveTicker />
       <StatsSection />
+      <div className="mx-auto max-w-5xl h-px bg-gradient-to-r from-transparent via-[var(--surface-border)] to-transparent" />
       <FeaturesSection />
       <RolesSection />
       <TestimonialsSection />

@@ -53,21 +53,29 @@ export function TestimonialsSection() {
                     {testimonials.map((t, i) => (
                         <motion.div
                             key={i}
-                            className="relative flex flex-col p-8 rounded-3xl bg-[var(--surface)] border border-[var(--surface-border)] hover:border-[var(--gold)]/20 transition-colors duration-300"
+                            className="relative flex flex-col p-10 rounded-3xl bg-[var(--card-bg)] backdrop-blur-xl border border-[var(--surface-border)] hover:border-[var(--gold)]/20 transition-all duration-[400ms] group"
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true, margin: "-50px" }}
                             transition={{ delay: i * 0.1 }}
                         >
+                            {/* Decorative large quote mark */}
+                            <div className="absolute top-6 right-8 text-7xl font-serif text-[var(--gold)] opacity-10 select-none leading-none pointer-events-none">
+                                &ldquo;
+                            </div>
+
+                            {/* Top gradient accent */}
+                            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--gold)]/30 to-transparent" />
+
                             {/* Stars */}
-                            <div className="flex gap-1 mb-5">
+                            <div className="flex gap-1.5 mb-6">
                                 {Array.from({ length: t.rating }).map((_, j) => (
-                                    <Star key={j} className="h-4 w-4 text-[var(--gold)] fill-[var(--gold)]" />
+                                    <Star key={j} className="h-5 w-5 text-[var(--gold)] fill-[var(--gold)]" />
                                 ))}
                             </div>
 
                             {/* Quote */}
-                            <p className="text-[var(--foreground)] leading-relaxed flex-1 mb-8">
+                            <p className="text-lg text-[var(--foreground)] leading-relaxed flex-1 mb-8">
                                 &ldquo;{t.quote}&rdquo;
                             </p>
 

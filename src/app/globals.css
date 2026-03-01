@@ -35,6 +35,16 @@
   --card-bg: rgba(255, 255, 255, 0.9);
   --input-bg: #ffffff;
   --input-border: #e2e8f0;
+  --gold-glow-strong: rgba(212, 160, 23, 0.4);
+  --hero-mesh-1: rgba(212, 160, 23, 0.08);
+  --hero-mesh-2: rgba(59, 130, 246, 0.06);
+  --hero-mesh-3: rgba(139, 92, 246, 0.04);
+  --glass-inner-glow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06);
+  --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.06), 0 16px 48px rgba(0, 0, 0, 0.1);
+  --hero-beam-1: rgba(212, 160, 23, 0.06);
+  --hero-beam-2: rgba(59, 130, 246, 0.04);
+  --hero-beam-3: rgba(139, 92, 246, 0.03);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -67,6 +77,16 @@
   --card-bg: rgba(11, 26, 46, 0.75);
   --input-bg: rgba(11, 32, 63, 0.5);
   --input-border: rgba(148, 163, 184, 0.12);
+  --gold-glow-strong: rgba(245, 166, 35, 0.5);
+  --hero-mesh-1: rgba(245, 166, 35, 0.07);
+  --hero-mesh-2: rgba(59, 130, 246, 0.05);
+  --hero-mesh-3: rgba(139, 92, 246, 0.04);
+  --glass-inner-glow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  --card-shadow: 0 2px 6px rgba(0, 0, 0, 0.2), 0 12px 32px rgba(0, 0, 0, 0.3);
+  --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.3), 0 24px 64px rgba(0, 0, 0, 0.4);
+  --hero-beam-1: rgba(245, 166, 35, 0.08);
+  --hero-beam-2: rgba(59, 130, 246, 0.06);
+  --hero-beam-3: rgba(139, 92, 246, 0.05);
 }
 
 @theme inline {
@@ -242,6 +262,58 @@
   }
 }
 
+@keyframes gradient-mesh {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(5%, -3%) scale(1.03); }
+  50% { transform: translate(-3%, 5%) scale(0.98); }
+  75% { transform: translate(3%, 2%) scale(1.02); }
+}
+
+@keyframes spotlight-pulse {
+  0%, 100% { opacity: 0.15; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.25; transform: translate(-50%, -50%) scale(1.15); }
+}
+
+@keyframes scroll-indicator {
+  0%, 20%, 100% { transform: translateY(0); opacity: 1; }
+  40% { transform: translateY(8px); opacity: 0.4; }
+}
+
+@keyframes gradient-border-spin {
+  0% { --gradient-angle: 0deg; }
+  100% { --gradient-angle: 360deg; }
+}
+
+@keyframes aurora-drift {
+  0% { transform: translateX(-10%) rotate(-2deg) scaleY(1); }
+  33% { transform: translateX(5%) rotate(1deg) scaleY(1.1); }
+  66% { transform: translateX(-5%) rotate(-1deg) scaleY(0.95); }
+  100% { transform: translateX(-10%) rotate(-2deg) scaleY(1); }
+}
+
+@keyframes beam-pulse {
+  0%, 100% { opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+}
+
+@keyframes hero-scan {
+  0% { background-position: 0% -200px; }
+  100% { background-position: 0% calc(100% + 200px); }
+}
+
+.animate-gradient-mesh {
+  animation: gradient-mesh 20s ease-in-out infinite;
+}
+
+.animate-spotlight {
+  animation: spotlight-pulse 4s ease-in-out infinite;
+}
+
+.animate-scroll-indicator {
+  animation: scroll-indicator 2s ease-in-out infinite;
+}
+
 .animate-fade-in-up {
   animation: fade-in-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
@@ -363,22 +435,54 @@ body {
 /* Glass card with subtle depth */
 .glass-card {
   background: var(--card-bg);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   border: 1px solid var(--surface-border);
   border-radius: 1rem;
-  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: var(--glass-inner-glow), var(--card-shadow);
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .glass-card:hover {
-  border-color: rgba(245, 166, 35, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(245, 166, 35, 0.05);
-  transform: translateY(-2px);
+  border-color: rgba(245, 166, 35, 0.25);
+  box-shadow: var(--glass-inner-glow), var(--card-shadow-hover), 0 0 0 1px rgba(245, 166, 35, 0.08);
+  transform: translateY(-3px);
 }
 
 .dark .glass-card:hover {
-  border-color: rgba(245, 166, 35, 0.25);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 24px rgba(245, 166, 35, 0.06);
+  border-color: rgba(245, 166, 35, 0.3);
+  box-shadow: var(--glass-inner-glow), var(--card-shadow-hover), 0 0 32px rgba(245, 166, 35, 0.08);
+}
+
+/* Gradient border card — animated spinning border on hover */
+.gradient-border-card {
+  position: relative;
+  border-radius: 1.25rem;
+  overflow: hidden;
+}
+
+.gradient-border-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--gradient-angle, 0deg),
+    transparent 40%,
+    var(--gold) 50%,
+    transparent 60%
+  );
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.gradient-border-card:hover::before {
+  opacity: 1;
+  animation: gradient-border-spin 3s linear infinite;
 }
 
 /* Gold hover glow — stronger version */
@@ -409,32 +513,34 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   Form Inputs
+   Form Inputs (in @layer so Tailwind utilities like pl-10 can override)
    ═══════════════════════════════════════════════════════════════ */
 
-.input-field {
-  width: 100%;
-  border-radius: 0.75rem;
-  border: 1px solid var(--input-border);
-  background: var(--input-bg);
-  padding: 0.75rem 1rem;
-  color: var(--foreground);
-  font-size: 0.875rem;
-  transition: all 0.2s ease;
-}
+@layer components {
+  .input-field {
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid var(--input-border);
+    background: var(--input-bg);
+    padding: 0.75rem 1rem;
+    color: var(--foreground);
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+  }
 
-.input-field::placeholder {
-  color: var(--foreground-subtle);
-}
+  .input-field::placeholder {
+    color: var(--foreground-subtle);
+  }
 
-.input-field:focus {
-  outline: none;
-  border-color: var(--gold);
-  box-shadow: 0 0 0 3px var(--gold-glow), 0 0 16px rgba(245, 166, 35, 0.08);
-}
+  .input-field:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px var(--gold-glow), 0 0 16px rgba(245, 166, 35, 0.08);
+  }
 
-.dark .input-field:focus {
-  box-shadow: 0 0 0 3px var(--gold-glow), 0 0 24px rgba(245, 166, 35, 0.1);
+  .dark .input-field:focus {
+    box-shadow: 0 0 0 3px var(--gold-glow), 0 0 24px rgba(245, 166, 35, 0.1);
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════

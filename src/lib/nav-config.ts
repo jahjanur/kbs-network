@@ -7,7 +7,7 @@ export const ROLE_ALLOWED_HREFS: Record<Role, Set<string>> = {
     "/dashboard/discover",
     "/dashboard/jobs",
     "/dashboard/messages",
-    "/dashboard/favorites",
+    "/dashboard/shortlist",
     "/dashboard/profile",
   ]),
   coach: new Set([
@@ -15,7 +15,7 @@ export const ROLE_ALLOWED_HREFS: Record<Role, Set<string>> = {
     "/dashboard/discover",
     "/dashboard/jobs",
     "/dashboard/messages",
-    "/dashboard/favorites",
+    "/dashboard/shortlist",
     "/dashboard/profile",
   ]),
   club: new Set([
@@ -23,21 +23,22 @@ export const ROLE_ALLOWED_HREFS: Record<Role, Set<string>> = {
     "/dashboard/discover",
     "/dashboard/jobs",
     "/dashboard/messages",
-    "/dashboard/favorites",
+    "/dashboard/shortlist",
     "/dashboard/profile",
+    "/dashboard/club/needs",
+    "/dashboard/club/applicants",
   ]),
   scout: new Set([
     "/dashboard",
     "/dashboard/discover",
     "/dashboard/messages",
-    "/dashboard/favorites",
+    "/dashboard/shortlist",
     "/dashboard/profile",
   ]),
   sponsor: new Set([
     "/dashboard",
     "/dashboard/discover",
     "/dashboard/messages",
-    "/dashboard/favorites",
     "/dashboard/profile",
   ]),
 };

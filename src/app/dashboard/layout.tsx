@@ -16,6 +16,8 @@ import {
   Heart,
   User,
   LogOut,
+  ClipboardList,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ROLE_ALLOWED_HREFS } from "@/lib/nav-config";
@@ -25,7 +27,9 @@ const nav: { href: string; label: string; icon: typeof Compass }[] = [
   { href: "/dashboard/discover", label: "Discover", icon: Compass },
   { href: "/dashboard/jobs", label: "Jobs", icon: Briefcase },
   { href: "/dashboard/messages", label: "Messages", icon: MessageCircle },
-  { href: "/dashboard/favorites", label: "Favorites", icon: Heart },
+  { href: "/dashboard/shortlist", label: "Shortlist", icon: Heart },
+  { href: "/dashboard/club/needs", label: "Club Needs", icon: ClipboardList },
+  { href: "/dashboard/club/applicants", label: "Applicants", icon: Users },
   { href: "/dashboard/profile", label: "Profile", icon: User },
 ];
 

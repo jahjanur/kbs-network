@@ -3,7 +3,10 @@
  * Replace with Supabase auth + profiles later.
  */
 
+import type { UserStatus } from "./permissions";
+
 export type Role = "player" | "coach" | "club" | "scout" | "sponsor";
+export type ProfileType = Role;
 
 const ROLE_KEY = "kbs_role";
 const ONBOARDING_DONE_KEY = "kbs_onboarding_done";
@@ -12,6 +15,12 @@ const EMAIL_KEY = "kbs_email";
 const PASSWORD_KEY = "kbs_password";
 const PROFILE_PIC_KEY = "kbs_profile_pic";
 const BANNER_PIC_KEY = "kbs_banner_pic";
+const USER_ID_KEY = "kbs_user_id";
+const SHORTLIST_KEY = "kbs_shortlist";
+const PRIVATE_NOTES_KEY = "kbs_private_notes";
+const STATUS_KEY = "kbs_status";
+const CLUB_NEEDS_KEY = "kbs_club_needs";
+const CONTACT_REQUESTS_KEY = "kbs_contact_requests";
 
 export interface PlayerProfile {
   role: "player";
@@ -53,6 +62,24 @@ export interface CoachProfile {
   bio: string;
 }
 
+export interface LeagueRecordEntry {
+  season: string;
+  position: number;
+  type: "current" | "mid-season" | "final";
+}
+
+export interface TransferEntry {
+  name: string;
+  position: string;
+  date: string;
+}
+
+export interface OfficialSponsor {
+  name: string;
+  logoUrl?: string;
+  category: string;
+}
+
 export interface ClubProfile {
   role: "club";
   clubName: string;
@@ -63,6 +90,13 @@ export interface ClubProfile {
   bio: string;
   recruitmentFocus: string[];
   facilities: string;
+  // Extended fields for visibility system
+  currentCoachId?: string;
+  leagueRecord?: LeagueRecordEntry[];
+  recentJoinings?: TransferEntry[];
+  recentDepartures?: TransferEntry[];
+  officialSponsors?: OfficialSponsor[];
+  connectedScoutIds?: string[];
 }
 
 export interface ScoutProfile {
@@ -181,4 +215,215 @@ export function clearStoredUser(): void {
   localStorage.removeItem(PASSWORD_KEY);
   localStorage.removeItem(PROFILE_PIC_KEY);
   localStorage.removeItem(BANNER_PIC_KEY);
+  localStorage.removeItem(USER_ID_KEY);
+  localStorage.removeItem(SHORTLIST_KEY);
+  localStorage.removeItem(PRIVATE_NOTES_KEY);
+  localStorage.removeItem(STATUS_KEY);
+  localStorage.removeItem(CLUB_NEEDS_KEY);
+  localStorage.removeItem(CONTACT_REQUESTS_KEY);
+}
+
+// ────────────────────────────────────────────────────────────
+// User ID (stable identifier for current user)
+// ────────────────────────────────────────────────────────────
+
+export function getUserId(): string {
+  if (typeof window === "undefined") return "";
+  let id = localStorage.getItem(USER_ID_KEY);
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(USER_ID_KEY, id);
+  }
+  return id;
+}
+
+// ────────────────────────────────────────────────────────────
+// Shortlist
+// ────────────────────────────────────────────────────────────
+
+export interface ShortlistEntry {
+  profileId: string;
+  profileType: ProfileType;
+  addedAt: string;
+}
+
+export function getShortlist(): ShortlistEntry[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(SHORTLIST_KEY);
+    return raw ? (JSON.parse(raw) as ShortlistEntry[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function addToShortlist(profileId: string, profileType: ProfileType): void {
+  if (typeof window === "undefined") return;
+  const list = getShortlist();
+  if (list.some((e) => e.profileId === profileId)) return;
+  list.push({ profileId, profileType, addedAt: new Date().toISOString() });
+  localStorage.setItem(SHORTLIST_KEY, JSON.stringify(list));
+}
+
+export function removeFromShortlist(profileId: string): void {
+  if (typeof window === "undefined") return;
+  const list = getShortlist().filter((e) => e.profileId !== profileId);
+  localStorage.setItem(SHORTLIST_KEY, JSON.stringify(list));
+}
+
+export function isInShortlist(profileId: string): boolean {
+  return getShortlist().some((e) => e.profileId === profileId);
+}
+
+// ────────────────────────────────────────────────────────────
+// Private Notes
+// ────────────────────────────────────────────────────────────
+
+export interface PrivateNote {
+  profileId: string;
+  text: string;
+  updatedAt: string;
+}
+
+export function getPrivateNotes(): Record<string, PrivateNote> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = localStorage.getItem(PRIVATE_NOTES_KEY);
+    return raw ? (JSON.parse(raw) as Record<string, PrivateNote>) : {};
+  } catch {
+    return {};
+  }
+}
+
+export function getPrivateNote(profileId: string): PrivateNote | null {
+  return getPrivateNotes()[profileId] ?? null;
+}
+
+export function setPrivateNote(profileId: string, text: string): void {
+  if (typeof window === "undefined") return;
+  const notes = getPrivateNotes();
+  notes[profileId] = { profileId, text, updatedAt: new Date().toISOString() };
+  localStorage.setItem(PRIVATE_NOTES_KEY, JSON.stringify(notes));
+}
+
+export function deletePrivateNote(profileId: string): void {
+  if (typeof window === "undefined") return;
+  const notes = getPrivateNotes();
+  delete notes[profileId];
+  localStorage.setItem(PRIVATE_NOTES_KEY, JSON.stringify(notes));
+}
+
+// ────────────────────────────────────────────────────────────
+// User Status (player & coach)
+// ────────────────────────────────────────────────────────────
+
+export function getUserStatus(): UserStatus | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(STATUS_KEY) as UserStatus | null;
+}
+
+export function setUserStatus(status: UserStatus): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(STATUS_KEY, status);
+}
+
+// ────────────────────────────────────────────────────────────
+// Club Needs
+// ────────────────────────────────────────────────────────────
+
+export interface ClubNeed {
+  id: string;
+  positionNeeded: string;
+  description: string;
+  urgency: "low" | "medium" | "high";
+  status: "open" | "filled" | "closed";
+  createdAt: string;
+}
+
+export function getClubNeeds(): ClubNeed[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(CLUB_NEEDS_KEY);
+    return raw ? (JSON.parse(raw) as ClubNeed[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function addClubNeed(need: Omit<ClubNeed, "id" | "createdAt">): void {
+  if (typeof window === "undefined") return;
+  const list = getClubNeeds();
+  list.push({ ...need, id: crypto.randomUUID(), createdAt: new Date().toISOString() });
+  localStorage.setItem(CLUB_NEEDS_KEY, JSON.stringify(list));
+}
+
+export function updateClubNeed(id: string, updates: Partial<ClubNeed>): void {
+  if (typeof window === "undefined") return;
+  const list = getClubNeeds().map((n) => (n.id === id ? { ...n, ...updates } : n));
+  localStorage.setItem(CLUB_NEEDS_KEY, JSON.stringify(list));
+}
+
+export function removeClubNeed(id: string): void {
+  if (typeof window === "undefined") return;
+  const list = getClubNeeds().filter((n) => n.id !== id);
+  localStorage.setItem(CLUB_NEEDS_KEY, JSON.stringify(list));
+}
+
+// ────────────────────────────────────────────────────────────
+// Contact Requests
+// ────────────────────────────────────────────────────────────
+
+export interface ContactRequest {
+  id: string;
+  fromUserId: string;
+  toUserId: string;
+  toName: string;
+  toProfileType: ProfileType;
+  message: string;
+  status: "pending" | "accepted" | "declined";
+  createdAt: string;
+}
+
+export function getContactRequests(): ContactRequest[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(CONTACT_REQUESTS_KEY);
+    return raw ? (JSON.parse(raw) as ContactRequest[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function sendContactRequest(
+  toUserId: string,
+  toName: string,
+  toProfileType: ProfileType,
+  message: string
+): ContactRequest {
+  const request: ContactRequest = {
+    id: crypto.randomUUID(),
+    fromUserId: getUserId(),
+    toUserId,
+    toName,
+    toProfileType,
+    message,
+    status: "pending",
+    createdAt: new Date().toISOString(),
+  };
+  const list = getContactRequests();
+  list.push(request);
+  if (typeof window !== "undefined") {
+    localStorage.setItem(CONTACT_REQUESTS_KEY, JSON.stringify(list));
+  }
+  return request;
+}
+
+export function getContactRequestCount(): number {
+  return getContactRequests().filter((r) => r.fromUserId === getUserId()).length;
+}
+
+export function hasContactRequestTo(toUserId: string): boolean {
+  return getContactRequests().some(
+    (r) => r.fromUserId === getUserId() && r.toUserId === toUserId
+  );
 }

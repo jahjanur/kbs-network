@@ -3,47 +3,58 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { getStoredProfile } from "@/lib/user-store";
-import type { PlayerProfile } from "@/lib/user-store";
+import { getStoredProfile, getShortlist, getContactRequests, getUserId, getUserStatus } from "@/lib/user-store";
+import type { PlayerProfile, ShortlistEntry } from "@/lib/user-store";
+import { getStatusConfig } from "@/lib/permissions";
+import { getProfileById, getProfileDisplayName } from "@/lib/mock-directory";
 import { Button } from "@/components/ui/button";
-import { User, Briefcase, FileCheck, MessageCircle, Heart, ChevronRight, MapPin, Award } from "lucide-react";
+import { User, Briefcase, FileCheck, MessageCircle, Heart, ChevronRight, MapPin, Award, Send } from "lucide-react";
 
 export default function DashboardPlayerPage() {
   const [profile, setProfile] = useState<PlayerProfile | null>(null);
+  const [shortlist, setShortlist] = useState<ShortlistEntry[]>([]);
+  const [sentCount, setSentCount] = useState(0);
+  const [status, setStatus] = useState<string | null>(null);
 
   useEffect(() => {
     const p = getStoredProfile();
     if (p && p.role === "player") setProfile(p);
+    setShortlist(getShortlist());
+    const reqs = getContactRequests();
+    const uid = getUserId();
+    setSentCount(reqs.filter((r) => r.fromUserId === uid).length);
+    setStatus(getUserStatus());
   }, []);
 
   const completion = profile
-    ? Math.min(
-      100,
-      [
-        profile.name,
-        profile.dateOfBirth,
-        profile.positionPrimary,
-        profile.city || profile.country,
-        profile.currentClub || profile.availability,
-      ].filter(Boolean).length * 20
-    )
+    ? Math.min(100, [profile.name, profile.dateOfBirth, profile.positionPrimary, profile.city || profile.country, profile.currentClub || profile.availability].filter(Boolean).length * 20)
     : 0;
 
-  const container = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.06 } },
-  };
-  const item = {
-    hidden: { opacity: 0, y: 12 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const } },
-  };
+  const statusCfg = status ? getStatusConfig(status) : null;
+
+  const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.06 } } };
+  const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const } } };
 
   return (
     <motion.div className="space-y-8" variants={container} initial="hidden" animate="show">
       <motion.div variants={item}>
-        <h1 className="text-2xl font-bold text-[var(--foreground)]">
-          Welcome back{profile?.name ? `, ${profile.name.split(" ")[0]}` : ""}
-        </h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-[var(--foreground)]">
+            Welcome back{profile?.name ? `, ${profile.name.split(" ")[0]}` : ""}
+          </h1>
+          {statusCfg && (
+            <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${
+              statusCfg.color === "emerald" ? "bg-emerald-500/15 text-emerald-500 border-emerald-500/30" :
+              statusCfg.color === "amber" ? "bg-amber-500/15 text-amber-500 border-amber-500/30" :
+              statusCfg.color === "blue" ? "bg-blue-500/15 text-blue-500 border-blue-500/30" :
+              statusCfg.color === "violet" ? "bg-violet-500/15 text-violet-500 border-violet-500/30" :
+              "bg-slate-500/15 text-slate-500 border-slate-500/30"
+            }`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${statusCfg.color === "emerald" ? "bg-emerald-500" : statusCfg.color === "amber" ? "bg-amber-500" : statusCfg.color === "blue" ? "bg-blue-500" : statusCfg.color === "violet" ? "bg-violet-500" : "bg-slate-500"}`} />
+              {statusCfg.label}
+            </span>
+          )}
+        </div>
         <p className="mt-1 text-sm text-[var(--foreground-muted)]">Your player dashboard</p>
       </motion.div>
 
@@ -62,38 +73,59 @@ export default function DashboardPlayerPage() {
           <span className="text-2xl font-bold bg-gradient-to-r from-[var(--gold)] to-[var(--gold-light)] bg-clip-text text-transparent">{completion}%</span>
         </div>
         <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-[var(--surface-border)]">
-          <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-[var(--gold)] to-[var(--gold-light)]"
-            initial={{ width: 0 }}
-            animate={{ width: `${completion}%` }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] as const }}
-          />
+          <motion.div className="h-full rounded-full bg-gradient-to-r from-[var(--gold)] to-[var(--gold-light)]" initial={{ width: 0 }} animate={{ width: `${completion}%` }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] as const }} />
         </div>
         <Button variant="outline" size="sm" className="mt-4" asChild>
           <Link href="/dashboard/profile">Edit profile</Link>
         </Button>
       </motion.section>
 
+      {/* Shortlist Preview */}
+      {shortlist.length > 0 && (
+        <motion.section variants={item}>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-[var(--foreground)]">My Shortlist</h2>
+            <Link href="/dashboard/shortlist" className="text-sm font-medium text-[var(--gold)] hover:underline flex items-center gap-1">
+              View all ({shortlist.length}) <ChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="mt-3 grid gap-3 sm:grid-cols-3">
+            {shortlist.slice(0, 3).map((entry) => {
+              const profile = getProfileById(entry.profileId);
+              if (!profile) return null;
+              const name = getProfileDisplayName(profile.profile);
+              return (
+                <Link key={entry.profileId} href={`/dashboard/profile/${entry.profileId}`} className="glass-card group !rounded-xl p-3 flex items-center gap-3 hover:border-[var(--gold)]/30 transition-colors">
+                  <div className="h-9 w-9 shrink-0 rounded-full bg-gradient-to-br from-[var(--gold)] to-amber-600 flex items-center justify-center">
+                    <span className="text-xs font-bold text-white">{name.split(" ").map((w) => w[0]).join("").slice(0, 2)}</span>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-[var(--foreground)] truncate">{name}</p>
+                    <p className="text-[10px] text-[var(--foreground-muted)] capitalize">{entry.profileType}</p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </motion.section>
+      )}
+
       {/* Recommendations */}
       <motion.section variants={item}>
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-[var(--foreground)]">Recommended for you</h2>
-          <Link href="/discover" className="text-sm font-medium text-[var(--gold)] hover:underline flex items-center gap-1">
+          <Link href="/dashboard/discover" className="text-sm font-medium text-[var(--gold)] hover:underline flex items-center gap-1">
             View all <ChevronRight className="h-4 w-4" />
           </Link>
         </div>
         <p className="mt-1 text-xs text-[var(--foreground-muted)]">Clubs and opportunities that match your profile</p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[
-            { name: "FC North Academy", desc: "Looking for ST, LW", icon: Award, match: "92% match" },
-            { name: "Open tryout — SV West", desc: "U21 squad · Next Saturday", icon: MapPin, match: "85% match" },
-            { name: "United South", desc: "Youth development program", icon: Briefcase, match: "78% match" },
+            { id: "cl1", name: "FC North Vienna", desc: "Looking for ST, LW", icon: Award, match: "92% match" },
+            { id: "cl3", name: "SC Tirol Innsbruck", desc: "Seeking goalkeepers", icon: MapPin, match: "85% match" },
+            { id: "cl5", name: "Union Vöcklabruck", desc: "Youth development", icon: Briefcase, match: "78% match" },
           ].map((rec) => (
-            <Link
-              key={rec.name}
-              href="/discover"
-              className="glass-card group !rounded-xl p-4 flex items-center gap-4 hover:border-[var(--gold)]/30 transition-colors"
-            >
+            <Link key={rec.name} href={`/dashboard/profile/${rec.id}`} className="glass-card group !rounded-xl p-4 flex items-center gap-4 hover:border-[var(--gold)]/30 transition-colors">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--gold)]/10 border border-[var(--gold)]/20">
                 <rec.icon className="h-5 w-5 text-[var(--gold)]" />
               </div>
@@ -107,47 +139,44 @@ export default function DashboardPlayerPage() {
         </div>
       </motion.section>
 
-      {/* Applications */}
+      {/* Sent Applications */}
       <motion.section variants={item}>
         <h2 className="text-lg font-semibold text-[var(--foreground)]">My applications</h2>
-        <p className="mt-1 text-xs text-[var(--foreground-muted)]">Track your applications to clubs and tryouts</p>
-        <div className="glass-card mt-4 p-8 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--surface)] border border-[var(--surface-border)]">
-            <FileCheck className="h-6 w-6 text-[var(--foreground-muted)]" />
+        <p className="mt-1 text-xs text-[var(--foreground-muted)]">Track your contact requests to clubs</p>
+        {sentCount > 0 ? (
+          <Link href="/dashboard/messages" className="glass-card mt-4 p-4 flex items-center gap-4 hover:border-[var(--gold)]/30 transition-colors">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--gold)]/10 border border-[var(--gold)]/20">
+              <Send className="h-5 w-5 text-[var(--gold)]" />
+            </div>
+            <div>
+              <p className="font-medium text-[var(--foreground)]">{sentCount} sent request{sentCount !== 1 ? "s" : ""}</p>
+              <p className="text-xs text-[var(--foreground-muted)]">View in messages</p>
+            </div>
+            <ChevronRight className="h-4 w-4 text-[var(--foreground-subtle)] ml-auto" />
+          </Link>
+        ) : (
+          <div className="glass-card mt-4 p-8 text-center">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--surface)] border border-[var(--surface-border)]">
+              <FileCheck className="h-6 w-6 text-[var(--foreground-muted)]" />
+            </div>
+            <p className="text-sm text-[var(--foreground-muted)]">No applications yet</p>
+            <Button variant="primary" size="sm" className="mt-3 rounded-full" asChild>
+              <Link href="/dashboard/discover">Browse clubs</Link>
+            </Button>
           </div>
-          <p className="text-sm text-[var(--foreground-muted)]">No applications yet</p>
-          <Button variant="primary" size="sm" className="mt-3 rounded-full" asChild>
-            <Link href="/jobs">Browse jobs</Link>
-          </Button>
-        </div>
+        )}
       </motion.section>
 
       {/* Quick links */}
       <motion.section variants={item} className="grid gap-4 sm:grid-cols-2">
-        <Link
-          href="/dashboard/messages"
-          className="glass-card group !rounded-xl p-4 flex items-center gap-4 hover:border-[var(--gold)]/30 transition-colors"
-        >
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500/10 border border-blue-500/20">
-            <MessageCircle className="h-5 w-5 text-blue-400" />
-          </div>
-          <div>
-            <p className="font-medium text-[var(--foreground)]">Messages</p>
-            <p className="text-xs text-[var(--foreground-muted)]">Chat with clubs</p>
-          </div>
+        <Link href="/dashboard/messages" className="glass-card group !rounded-xl p-4 flex items-center gap-4 hover:border-[var(--gold)]/30 transition-colors">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500/10 border border-blue-500/20"><MessageCircle className="h-5 w-5 text-blue-400" /></div>
+          <div><p className="font-medium text-[var(--foreground)]">Messages</p><p className="text-xs text-[var(--foreground-muted)]">Contact requests</p></div>
           <ChevronRight className="h-4 w-4 text-[var(--foreground-subtle)] group-hover:text-[var(--gold)] ml-auto transition-colors" />
         </Link>
-        <Link
-          href="/dashboard/favorites"
-          className="glass-card group !rounded-xl p-4 flex items-center gap-4 hover:border-[var(--gold)]/30 transition-colors"
-        >
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-rose-500/10 border border-rose-500/20">
-            <Heart className="h-5 w-5 text-rose-400" />
-          </div>
-          <div>
-            <p className="font-medium text-[var(--foreground)]">Favorites</p>
-            <p className="text-xs text-[var(--foreground-muted)]">Saved clubs and jobs</p>
-          </div>
+        <Link href="/dashboard/shortlist" className="glass-card group !rounded-xl p-4 flex items-center gap-4 hover:border-[var(--gold)]/30 transition-colors">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-rose-500/10 border border-rose-500/20"><Heart className="h-5 w-5 text-rose-400" /></div>
+          <div><p className="font-medium text-[var(--foreground)]">Shortlist</p><p className="text-xs text-[var(--foreground-muted)]">{shortlist.length} saved profiles</p></div>
           <ChevronRight className="h-4 w-4 text-[var(--foreground-subtle)] group-hover:text-[var(--gold)] ml-auto transition-colors" />
         </Link>
       </motion.section>

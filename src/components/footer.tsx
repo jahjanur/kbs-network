@@ -20,7 +20,12 @@ export function Footer() {
     }
 
     return (
-        <footer className="relative border-t border-[var(--surface-border)] bg-[var(--surface)]/50 pt-16 pb-8 backdrop-blur-md">
+        <footer className="relative border-t border-[var(--surface-border)] bg-[var(--surface)]/50 pt-20 pb-10 backdrop-blur-md">
+            {/* Gold accent top line */}
+            <div
+                className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-2/3"
+                style={{ background: "linear-gradient(90deg, transparent, rgba(245,166,35,0.3), transparent)" }}
+            />
             <div className="mx-auto max-w-7xl px-4">
                 <div className="grid gap-12 lg:grid-cols-4 mb-16">
                     {/* Brand Column */}
