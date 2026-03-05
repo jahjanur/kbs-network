@@ -241,7 +241,7 @@ export function HeroSection() {
                 className="rounded-full px-10"
                 asChild
               >
-                <Link href="/discover">Browse talent</Link>
+                <Link href="/register">Browse talent</Link>
               </Button>
             </motion.div>
 

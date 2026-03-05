@@ -61,9 +61,9 @@ interface NavItem {
 const platformLinks: NavLink[] = [
   {
     label: "Discover Talent",
-    href: "/discover",
+    href: "/register",
     icon: Search,
-    description: "Browse players, coaches & clubs",
+    description: "Sign up to browse players, coaches & clubs",
   },
   {
     label: "Job Board",
@@ -345,7 +345,7 @@ export function Header() {
                 : Briefcase,
         }))
     : [
-        { label: "Discover Talent", href: "/discover", icon: Search },
+        { label: "Discover Talent", href: "/register", icon: Search },
         { label: "Job Board", href: "/jobs", icon: Briefcase },
         { label: "Pricing", href: "/pricing", icon: CreditCard },
         { label: "About", href: "/about", icon: Info },
@@ -421,7 +421,7 @@ export function Header() {
             /* Guest: quick links + mega menu */
             <>
               {[
-                { label: "Discover", href: "/discover", icon: Search },
+                { label: "Discover", href: "/register", icon: Search },
                 { label: "Jobs", href: "/jobs", icon: Briefcase },
                 { label: "Pricing", href: "/pricing", icon: Zap },
               ].map((item, i) => (

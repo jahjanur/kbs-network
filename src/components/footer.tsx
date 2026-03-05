@@ -51,7 +51,7 @@ export function Footer() {
                             <li><FooterLink href="/register">For Players</FooterLink></li>
                             <li><FooterLink href="/register">For Clubs</FooterLink></li>
                             <li><FooterLink href="/register">For Scouts</FooterLink></li>
-                            <li><FooterLink href="/discover">Browse Talent</FooterLink></li>
+                            <li><FooterLink href="/register">Browse Talent</FooterLink></li>
                             <li><FooterLink href="/jobs">Job Board</FooterLink></li>
                         </ul>
                     </div>

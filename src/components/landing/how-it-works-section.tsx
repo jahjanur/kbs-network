@@ -35,7 +35,7 @@ const steps = [
       "Save searches and get notified of new matches",
     ],
     accent: "blue" as const,
-    cta: { label: "Explore Talent", href: "/discover" },
+    cta: { label: "Explore Talent", href: "/register" },
   },
   {
     number: "03",
